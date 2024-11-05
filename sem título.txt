@@ -193,7 +193,13 @@ Toggle:OnChanged(function(value)
         -- Inicia o loop de cliques em um novo thread
         clickThread = spawn(function()
             while isAutoClicking do
-                game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack(args))
+                -- Verifica se o personagem e o Communicate estão disponíveis
+                local player = game.Players.LocalPlayer
+                if player and player.Character and player.Character:FindFirstChild("Communicate") then
+                    player.Character.Communicate:FireServer(unpack(args))
+                else
+                    print("Erro: O personagem ou Communicate não está disponível.")
+                end
                 wait(0.1) -- Intervalo entre os cliques
             end
         end)
@@ -214,26 +220,21 @@ local AutoFarmPlayerToggle = Tabs.Main:AddToggle("AutoFarmPlayerToggle", {
 local AutoFarmEnabled = false
 local currentTarget = nil
 
-local function TeleportToPlayerFacing(targetPlayer)
+local function TeleportToPlayerBack(targetPlayer)
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
 
     if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local targetCharacter = targetPlayer.Character
-        local targetHead = targetCharacter:FindFirstChild("Head")
+        local targetPosition = targetCharacter.HumanoidRootPart.Position
+        local targetLookVector = targetCharacter.HumanoidRootPart.CFrame.LookVector
 
-        if character and targetHead then
+        if character then
             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
             if humanoidRootPart then
-                -- Posiciona o personagem diretamente em cima da cabeça do jogador alvo
-                local abovePosition = targetHead.Position + Vector3.new(0, 2, 0) -- 2 unidades acima da cabeça
-
-                -- Calcula a direção para olhar para o alvo
-                local direction = (targetHead.Position - humanoidRootPart.Position).unit
-                local lookAtPosition = targetHead.Position
-
-                -- Define a posição e orientação do personagem
-                humanoidRootPart.CFrame = CFrame.new(abovePosition, lookAtPosition) * CFrame.Angles(math.rad(-90), 0, 0) -- Deitado de frente
+                -- Aumentar a distância para 4 unidades
+                local behindPosition = targetPosition - (targetLookVector * 4) + Vector3.new(0, 2, 0)
+                humanoidRootPart.CFrame = CFrame.new(behindPosition)
             end
         end
     end
@@ -264,12 +265,12 @@ local function StartAutoFarm()
         if currentTarget == nil or not currentTarget.Character or not game.Players:FindFirstChild(currentTarget.Name) or currentTarget.Character.Humanoid.Health <= 0 then
             currentTarget = FindClosestPlayer()
             if currentTarget then
-                TeleportToPlayerFacing(currentTarget)
+                TeleportToPlayerBack(currentTarget)
             end
         end
 
         if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("HumanoidRootPart") then
-            TeleportToPlayerFacing(currentTarget)
+            TeleportToPlayerBack(currentTarget)
         end
 
         wait(0.1) -- Ajustar o tempo de espera conforme necessário
@@ -282,7 +283,7 @@ Toggle:OnChanged(function()
     if AutoFarmEnabled then
         currentTarget = FindClosestPlayer()
         if currentTarget then
-            TeleportToPlayerFacing(currentTarget)
+            TeleportToPlayerBack(currentTarget)
         end
         StartAutoFarm()
     else
