@@ -182,16 +182,22 @@ local args = {
     }
 }
 
+local isAutoClicking = false -- Variável para controlar o estado do auto click
+
 -- Callback para o toggle
 Toggle:OnChanged(function(value)
     if value then
         print("Auto Click ativado.")
-        while Toggle.Value do
-            game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack(args))
-            wait(0.1) -- Intervalo entre os cliques, ajuste conforme necessário
-        end
+        isAutoClicking = true
+        spawn(function() -- Inicia um novo thread
+            while isAutoClicking do
+                game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack(args))
+                wait(0.1) -- Intervalo entre os cliques
+            end
+        end)
     else
         print("Auto Click desativado.")
+        isAutoClicking = false -- Para o loop de cliques
     end
 end)
 
