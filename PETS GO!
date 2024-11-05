@@ -121,7 +121,8 @@ local eggsRollRemote = network:WaitForChild("Eggs_Roll")
 
 local isRolling = false -- Variável para controlar o estado da rolagem
 
--- Cria o toggle
+local AutoRoolSection = Tabs.AutoFarm:AddSection("Auto Roll")
+
 -- Cria o toggle no início do script
 local Toggle = Tabs.AutoFarm:AddToggle("MyToggle", {Title = "Auto Roll + Skip Animation", Default = false })
 
