@@ -15,7 +15,6 @@ local Window = Fluent:CreateWindow({
 local Tabs = {
     InfoScript = Window:AddTab({ Title = "Info Script", Icon = "scroll" }),
     AutoFarm = Window:AddTab({ Title = "Auto Farm", Icon = "egg" }),
-    Player = Window:AddTab({ Title = "Player", Icon = "user" }),
     Others = Window:AddTab({ Title = "Others", Icon = "star" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
@@ -37,7 +36,7 @@ Tabs.InfoScript:AddParagraph({
 local UpdatesSection = Tabs.InfoScript:AddSection("Updates")
 Tabs.InfoScript:AddParagraph({
     Title = "Updates",
-    Content = "- 3/11/2024"
+    Content = "- 5/11/2024"
 })
 
 local SupportSection = Tabs.InfoScript:AddSection("Support Executors")
