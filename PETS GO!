@@ -3,8 +3,8 @@ local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/d
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "[🎃UPD2🎃] +1 Blade Slayer",
-    SubTitle = "By Zetra Hub ❤️",
+    Title = "PETS GO!",
+    SubTitle = "By Zetra Hub",
     TabWidth = 135,
     Size = UDim2.fromOffset(480, 360),
     Acrylic = true,
@@ -14,7 +14,7 @@ local Window = Fluent:CreateWindow({
 
 local Tabs = {
     InfoScript = Window:AddTab({ Title = "Info Script", Icon = "scroll" }),
-    Main = Window:AddTab({ Title = "Main", Icon = "home" }),
+    AutoFarm = Window:AddTab({ Title = "Auto Farm", Icon = "egg" }),
     Player = Window:AddTab({ Title = "Player", Icon = "user" }),
     Others = Window:AddTab({ Title = "Others", Icon = "star" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
@@ -123,18 +123,15 @@ local eggsRollRemote = network:WaitForChild("Eggs_Roll")
 local isRolling = false -- Variável para controlar o estado da rolagem
 
 -- Cria o toggle
-local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Roll + Skip Animation", Default = false })
+-- Cria o toggle no início do script
+local Toggle = Tabs.AutoFarm:AddToggle("MyToggle", {Title = "Auto Roll + Skip Animation", Default = false })
 
-Toggle:OnChanged(function()
-    if Toggle.Value then
-        print("Toggle ativado: Iniciando rolagem de ovos.")
-        isRolling = true
-        autoRollEggs()
-    else
-        print("Toggle desativado: Parando rolagem de ovos.")
-        isRolling = false
-    end
-end)
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local network = replicatedStorage:WaitForChild("Network")
+local eggsRollRemote = network:WaitForChild("Eggs_Roll")
+
+-- Variável para controlar o estado da rolagem
+local isRolling = false 
 
 -- Função para rolar ovos automaticamente
 local function autoRollEggs()
@@ -143,6 +140,18 @@ local function autoRollEggs()
         wait(0.1) -- Ajuste o tempo de espera conforme necessário
     end
 end
+
+-- Define o comportamento do toggle
+Toggle:OnChanged(function()
+    if Toggle.Value then
+        print("Toggle ativado: Iniciando rolagem de ovos.")
+        isRolling = true
+        task.spawn(autoRollEggs) -- Inicia a rolagem em uma nova thread
+    else
+        print("Toggle desativado: Parando rolagem de ovos.")
+        isRolling = false
+    end
+end)
 
 -- Inicializa o toggle como desativado
 Toggle:SetValue(false)
