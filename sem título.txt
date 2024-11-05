@@ -214,7 +214,7 @@ end)
 
 -- Auto Farm Player
 
-local AutoFarmPlayerToggle = Tabs.Main:AddToggle("AutoFarmPlayerToggle", { 
+local Toggle = Tabs.Main:AddToggle("AutoFarmPlayerToggle", { 
     Title = "Kill Farm (Random Players)", 
     Default = false 
 })
