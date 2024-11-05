@@ -173,6 +173,8 @@ Input:OnChanged(function()
     print("Input atualizado:", Input.Value)
 end)
 
+local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Attack", Default = false })
+
 local args = {
     [1] = {
         ["Goal"] = "LeftClick",
@@ -180,31 +182,20 @@ local args = {
     }
 }
 
--- Variável para controlar o estado do toggle
-local autoClickEnabled = false
-
--- Adiciona o toggle na aba Main
-local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Attack", Default = false})
-
-Toggle:OnChanged(function()
-    autoClickEnabled = Toggle.Value
-    print("Toggle changed:", autoClickEnabled)
-    
-    -- Inicia ou para a execução automática com base no estado do toggle
-    if autoClickEnabled then
-        autoExecute()  -- Chama a função para iniciar a execução automática
+-- Callback para o toggle
+Toggle:OnChanged(function(value)
+    if value then
+        print("Auto Click ativado.")
+        while Toggle.Value do
+            game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack(args))
+            wait(0.1) -- Intervalo entre os cliques, ajuste conforme necessário
+        end
+    else
+        print("Auto Click desativado.")
     end
 end)
 
 Options.MyToggle:SetValue(false)
-
--- Função para executar o comando automaticamente
-local function autoExecute()
-    while autoClickEnabled do -- Continua enquanto o toggle estiver ativado
-        game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack(args))
-        wait(0.1) -- Define o intervalo em segundos
-    end
-end
 
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
