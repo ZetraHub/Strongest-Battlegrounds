@@ -13,9 +13,10 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    InfoScript = Window:AddTab({ Title = "Info Script", Icon = "scroll" }),
-    Player = Window:AddTab({ Title = "Player", Icon = "user" }),
-    Others = Window:AddTab({ Title = "Others", Icon = "star" })
+    InfoScript = Window:AddTab({ Title = "Info Script", Icon = "scroll" }),
+    Player = Window:AddTab({ Title = "Player", Icon = "user" }),
+    Others = Window:AddTab({ Title = "Others", Icon = "star" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
 local Options = Fluent.Options
@@ -171,40 +172,14 @@ Input:OnChanged(function()
     print("Input atualizado:", Input.Value)
 end)
 
-local InfiniteJumpSection = Tabs.Player:AddSection("Infinite Jump")
-
-local UserInputService = game:GetService("UserInputService")
-local jumpEnabled = false
-
-local function onJumpRequest()
-    if jumpEnabled and character:FindFirstChild("Humanoid") then
-        character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end
-
-UserInputService.JumpRequest:Connect(onJumpRequest)
-
-local Toggle = Tabs.Player:AddToggle("MyToggle", {Title = "Enable Infinite Jump", Default = false })
-
-Toggle:OnChanged(function()
-    jumpEnabled = Toggle.Value
-    if jumpEnabled then
-        print("Infinite Jump ativado.")
-    else
-        print("Infinite Jump desativado.")
-    end
-end)
-
-player.CharacterAdded:Connect(function(newCharacter)
-    character = newCharacter
-end)
-
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 InterfaceManager:SetFolder("FluentScriptHub")
 SaveManager:SetFolder("FluentScriptHub/specific-game")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
 
 Window:SelectTab(1)
 
