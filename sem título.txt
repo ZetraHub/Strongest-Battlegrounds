@@ -212,7 +212,89 @@ Toggle:OnChanged(function(value)
     end
 end)
 
+-- Auto Farm Player
 
+local AutoFarmPlayerToggle = Tabs.Main:AddToggle("AutoFarmPlayerToggle", { 
+    Title = "Kill Farm (Random Players)", 
+    Default = false 
+})
+
+local AutoFarmEnabled = false
+local currentTarget = nil
+
+local function TeleportToPlayerBack(targetPlayer)
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local targetCharacter = targetPlayer.Character
+        local targetPosition = targetCharacter.HumanoidRootPart.Position
+        local targetLookVector = targetCharacter.HumanoidRootPart.CFrame.LookVector
+
+        if character then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                -- Aumentar a distância para 4 unidades
+                local behindPosition = targetPosition - (targetLookVector * 4) + Vector3.new(0, 2, 0)
+                humanoidRootPart.CFrame = CFrame.new(behindPosition)
+            end
+        end
+    end
+end
+
+local function FindClosestPlayer()
+    local closestPlayer = nil
+    local closestDistance = math.huge
+
+    for _, targetPlayer in pairs(game.Players:GetPlayers()) do
+        if targetPlayer ~= game.Players.LocalPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") and targetPlayer.Character.Humanoid.Health > 0 then
+            local playerPosition = targetPlayer.Character.HumanoidRootPart.Position
+            local localPlayerPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+            local distance = (playerPosition - localPlayerPosition).Magnitude
+
+            if distance < closestDistance then
+                closestDistance = distance
+                closestPlayer = targetPlayer
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+local function StartAutoFarm()
+    while AutoFarmEnabled do
+        if currentTarget == nil or not currentTarget.Character or not game.Players:FindFirstChild(currentTarget.Name) or currentTarget.Character.Humanoid.Health <= 0 then
+            currentTarget = FindClosestPlayer()
+            if currentTarget then
+                TeleportToPlayerBack(currentTarget)
+            end
+        end
+
+        if currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("HumanoidRootPart") then
+            TeleportToPlayerBack(currentTarget)
+        end
+
+        wait(0.1) -- Ajustar o tempo de espera conforme necessário
+    end
+end
+
+Toggle:OnChanged(function()
+    AutoFarmEnabled = Options.AutoFarmPlayerToggle.Value
+
+    if AutoFarmEnabled then
+        currentTarget = FindClosestPlayer()
+        if currentTarget then
+            TeleportToPlayerBack(currentTarget)
+        end
+        StartAutoFarm()
+    else
+        currentTarget = nil
+        print("Auto Farm desativado.")
+    end
+end)
+
+Options.AutoFarmPlayerToggle:SetValue(false)
 
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
