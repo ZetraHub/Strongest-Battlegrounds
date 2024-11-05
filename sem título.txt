@@ -13,6 +13,7 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "home" }),
     InfoScript = Window:AddTab({ Title = "Info Script", Icon = "scroll" }),
     Player = Window:AddTab({ Title = "Player", Icon = "user" }),
     Others = Window:AddTab({ Title = "Others", Icon = "star" }),
@@ -171,6 +172,39 @@ end)
 Input:OnChanged(function()
     print("Input atualizado:", Input.Value)
 end)
+
+local args = {
+    [1] = {
+        ["Goal"] = "LeftClick",
+        ["Mobile"] = true
+    }
+}
+
+-- Variável para controlar o estado do toggle
+local autoClickEnabled = false
+
+-- Adiciona o toggle na aba Main
+local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "Auto Attack", Default = false})
+
+Toggle:OnChanged(function()
+    autoClickEnabled = Toggle.Value
+    print("Toggle changed:", autoClickEnabled)
+    
+    -- Inicia ou para a execução automática com base no estado do toggle
+    if autoClickEnabled then
+        autoExecute()  -- Chama a função para iniciar a execução automática
+    end
+end)
+
+Options.MyToggle:SetValue(false)
+
+-- Função para executar o comando automaticamente
+local function autoExecute()
+    while autoClickEnabled do -- Continua enquanto o toggle estiver ativado
+        game:GetService("Players").LocalPlayer.Character.Communicate:FireServer(unpack(args))
+        wait(0.1) -- Define o intervalo em segundos
+    end
+end
 
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
