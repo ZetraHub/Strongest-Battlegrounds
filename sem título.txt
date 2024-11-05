@@ -1,0 +1,217 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "[🎃UPD2🎃] +1 Blade Slayer",
+    SubTitle = "By Zetra Hub ❤️",
+    TabWidth = 135,
+    Size = UDim2.fromOffset(480, 360),
+    Acrylic = true,
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    InfoScript = Window:AddTab({ Title = "Info Script", Icon = "scroll" }),
+    Player = Window:AddTab({ Title = "Player", Icon = "user" }),
+    Others = Window:AddTab({ Title = "Others", Icon = "star" })
+}
+
+local Options = Fluent.Options
+
+Fluent:Notify({
+    Title = "By ZetraScripts YT",
+    Content = "Thanks for using the script",
+    Duration = 5
+})
+
+local SupportSection = Tabs.InfoScript:AddSection("Support")
+Tabs.InfoScript:AddParagraph({
+    Title = "Supported",
+    Content = "- Mobile\n- PC\n- Emulator\n- Console"
+})
+
+local UpdatesSection = Tabs.InfoScript:AddSection("Updates")
+Tabs.InfoScript:AddParagraph({
+    Title = "Updates",
+    Content = "- 3/11/2024"
+})
+
+local SupportSection = Tabs.InfoScript:AddSection("Support Executors")
+Tabs.InfoScript:AddParagraph({
+    Title = "Executors",
+    Content = "- Delta\n- Fluxus\n- Arceus X\n- Wave\n- Codex"
+})
+
+local CreditsSection = Tabs.InfoScript:AddSection("Credits")
+
+local linkParaCopiar = "https://youtube.com/@zetrascripts?si=suM_heCy4O_X-P4H"
+Tabs.InfoScript:AddButton({
+    Title = "Copy Link Channel",
+    Callback = function()
+        setclipboard(linkParaCopiar)
+        print("Link copied to clipboard.")
+    end
+})
+
+local AntiAFKEnabled = true
+local Toggle = Tabs.Others:AddToggle("MyToggle", {Title = "Anti AFK", Default = true})
+Toggle:OnChanged(function()
+    AntiAFKEnabled = Options.MyToggle.Value
+    print("Toggle changed:", AntiAFKEnabled)
+end)
+Options.MyToggle:SetValue(true)
+
+Tabs.Others:AddButton({
+    Title = "Server Hop",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local HttpService = game:GetService("HttpService")
+        local placeId = game.PlaceId
+
+        local function serverHop()
+            local servers
+            local cursor = ""
+
+            local success, response = pcall(function()
+                local url = "https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. cursor
+                return HttpService:JSONDecode(game:HttpGet(url))
+            end)
+
+            if success and response and response.data then
+                servers = response.data
+            else
+                warn("Não foi possível obter servidores.")
+                return
+            end
+
+            for _, server in ipairs(servers) do
+                if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                    TeleportService:TeleportToPlaceInstance(placeId, server.id)
+                    return
+                end
+            end
+
+            if response.nextPageCursor then
+                cursor = response.nextPageCursor
+                serverHop()
+            else
+                warn("Nenhum servidor disponível para hop.")
+            end
+        end
+
+        serverHop()
+    end
+})
+
+Tabs.Others:AddButton({
+    Title = "Rejoin",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local player = game.Players.LocalPlayer
+        TeleportService:Teleport(game.PlaceId, player)
+    end
+})
+
+local WalkSpeedSection = Tabs.Player:AddSection("WalkSpeed")
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local defaultWalkSpeed = 16 
+local currentWalkSpeed = defaultWalkSpeed
+local speedEnabled = false
+
+local function setWalkSpeed(speed)
+    if character and character:FindFirstChild("Humanoid") then
+        character.Humanoid.WalkSpeed = speed
+    end
+end
+
+local Input = Tabs.Player:AddInput("Input", {
+    Title = "Select Speed",
+    Default = tostring(defaultWalkSpeed),
+    Placeholder = "choose speed",
+    Numeric = true,
+    Finished = true,
+    Callback = function(Value)
+        local speed = tonumber(Value)
+        if speed and speed >= 0 and speed <= 100 then
+            currentWalkSpeed = speed
+            if speedEnabled then
+                setWalkSpeed(currentWalkSpeed)
+            end
+            print("Velocidade definida para:", currentWalkSpeed)
+        else
+            print("Por favor, insira um valor entre 0 e 100.")
+        end
+    end
+})
+
+local Toggle = Tabs.Player:AddToggle("MyToggle", {Title = "Apply Speed", Default = false })
+
+Toggle:OnChanged(function()
+    speedEnabled = Toggle.Value
+    if speedEnabled then
+        setWalkSpeed(currentWalkSpeed)
+        print("Velocidade ativada:", currentWalkSpeed)
+    else
+        setWalkSpeed(defaultWalkSpeed)
+        print("Velocidade desativada. Voltando ao padrão:", defaultWalkSpeed)
+    end
+end)
+
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    setWalkSpeed(speedEnabled and currentWalkSpeed or defaultWalkSpeed)
+end)
+
+Input:OnChanged(function()
+    print("Input atualizado:", Input.Value)
+end)
+
+local InfiniteJumpSection = Tabs.Player:AddSection("Infinite Jump")
+
+local UserInputService = game:GetService("UserInputService")
+local jumpEnabled = false
+
+local function onJumpRequest()
+    if jumpEnabled and character:FindFirstChild("Humanoid") then
+        character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end
+
+UserInputService.JumpRequest:Connect(onJumpRequest)
+
+local Toggle = Tabs.Player:AddToggle("MyToggle", {Title = "Enable Infinite Jump", Default = false })
+
+Toggle:OnChanged(function()
+    jumpEnabled = Toggle.Value
+    if jumpEnabled then
+        print("Infinite Jump ativado.")
+    else
+        print("Infinite Jump desativado.")
+    end
+end)
+
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+end)
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Fluent",
+    Content = "The script has been loaded.",
+    Duration = 8
+})
+
+SaveManager:LoadAutoloadConfig()
