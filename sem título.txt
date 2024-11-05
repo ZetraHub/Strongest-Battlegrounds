@@ -206,7 +206,7 @@ Toggle:OnChanged(function(value)
     end
 end)
 
-local Toggle = Tabs.Main:AddToggle("AutoFarmPlayerToggle", { 
+local AutoFarmPlayerToggle = Tabs.Main:AddToggle("AutoFarmPlayerToggle", { 
     Title = "Kill Farm (Random Players)", 
     Default = false 
 })
